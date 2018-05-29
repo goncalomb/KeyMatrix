@@ -28,46 +28,74 @@ Adafruit_SSD1306 oled(0);
 #define OLED_FNT_H 8
 
 const char *mode_str[] = {"abc", "ABC", "123"};
+bool txt_mode = true;
+
+void oled_draw_text(String str) {
+  oled.fillRect(0, OLED_FNT_H, SSD1306_LCDWIDTH, SSD1306_LCDHEIGHT, BLACK);
+  oled.setCursor(0, OLED_FNT_H);
+  oled.println(str);
+  oled.display();
+}
+
+void toogle_txt_mode() {
+  txt_mode = !txt_mode;
+  if (txt_mode) {
+    // put keypad in text mode
+    keypad.startTextMode(buff, BUFF_LEN);
+    Serial.println("(TEXT MODE ON)");
+    // clear and draw header
+    oled.clearDisplay();
+    oled.setCursor(0, 0);
+    oled.print(mode_str[keypad.mode()]);
+    oled.print("  *: BKSP #: MODE");
+    oled.display();
+  } else {
+    // exit text mode
+    keypad.stopTextMode();
+    Serial.println("(TEXT MODE OFF)");
+    // clear and draw header
+    oled.clearDisplay();
+    oled.setCursor(0, 0);
+    oled.print("0: TEXT MODE");
+    oled.display();
+  }
+}
 
 void setup() {
   Serial.begin(9600);
 
-  // put keypad in text mode
-  keypad.startTextMode(buff, BUFF_LEN);
-
   // initialize oled
   oled.begin(SSD1306_SWITCHCAPVCC, 0x3C, false);
-  oled.clearDisplay();
   oled.setTextSize(1);
   oled.setTextColor(WHITE, BLACK);
-  // draw first line
-  oled.setCursor(0, 0);
-  oled.print(mode_str[keypad.mode()]);
-  oled.print("  *: BKSP #: MODE");
-  // display
-  oled.display();
+
+  toogle_txt_mode();
 }
 
 void loop() {
   // poll events from the keypad
   if (keypad.pollEvent()) {
+    String ev_str = event_to_string(keypad.event);
+
     // print to serial
-    Serial.println(event_to_string(keypad.event));
+    Serial.println(ev_str);
 
     // handle text and mode
     if (keypad.event.type == KM_TEXT) {
+      // text change event
       Serial.println(buff);
-      oled.fillRect(0, OLED_FNT_H, SSD1306_LCDWIDTH, SSD1306_LCDHEIGHT, BLACK);
-      oled.setCursor(0, OLED_FNT_H);
-      oled.println(buff);
-      oled.display();
+      oled_draw_text(buff);
     } else if (keypad.event.type == KM_MODE) {
+      // mode change event (abc, ABC, 123)
       oled.setCursor(0, 0);
       oled.print(mode_str[keypad.event.c]);
       oled.display();
+    } else if (keypad.event.type == KM_KEYDOWN && keypad.event.c == '0') {
+      toogle_txt_mode();
+    } else if (!txt_mode) {
+      oled_draw_text(ev_str);
     }
   }
-  delay(10);
 }
 
 // helper function to print events
