@@ -23,6 +23,7 @@
 #define KM_TEXT 3
 #define KM_MODE 4
 
+#define KM_MODE_NONE -1
 #define KM_MODE_LOWER 0
 #define KM_MODE_UPPER 1
 #define KM_MODE_NUM 2

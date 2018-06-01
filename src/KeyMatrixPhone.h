@@ -13,6 +13,7 @@ public:
     int _len;
     int _cur;
     char _mode;
+    char _modeLock;
     char _lastKey;
     int _timer;
     int _charIndex;
@@ -20,7 +21,7 @@ public:
 public:
     KeyMatrixPhone(char *keymap, byte rows, byte cols, byte *rowPins, byte *colPins);
     bool pollEvent();
-    void startTextMode(char *buffer, int length);
+    void startTextMode(char *buffer, int length, char mode = KM_MODE_LOWER, bool modeLock = false);
     void stopTextMode();
     int cursor();
     char mode();

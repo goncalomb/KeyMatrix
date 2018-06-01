@@ -28,7 +28,6 @@ Adafruit_SSD1306 oled(0);
 #define OLED_FNT_H 8
 
 const char *mode_str[] = {"abc", "ABC", "123"};
-bool txt_mode = true;
 
 void oled_draw_text(String str) {
   oled.fillRect(0, OLED_FNT_H, SSD1306_LCDWIDTH, SSD1306_LCDHEIGHT, BLACK);
@@ -38,8 +37,7 @@ void oled_draw_text(String str) {
 }
 
 void toogle_txt_mode() {
-  txt_mode = !txt_mode;
-  if (txt_mode) {
+  if (keypad.mode() == KM_MODE_NONE) {
     // put keypad in text mode
     keypad.startTextMode(buff, BUFF_LEN);
     Serial.println("(TEXT MODE ON)");
@@ -92,7 +90,7 @@ void loop() {
       oled.display();
     } else if (keypad.event.type == KM_KEYDOWN && keypad.event.c == '0') {
       toogle_txt_mode();
-    } else if (!txt_mode) {
+    } else if (keypad.mode() == KM_MODE_NONE) {
       oled_draw_text(ev_str);
     }
   }

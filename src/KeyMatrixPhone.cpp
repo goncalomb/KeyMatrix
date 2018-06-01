@@ -32,7 +32,7 @@ boolean KeyMatrixPhone::pollEvent() {
                 _timer = -1;
                 event.type = KM_TEXT;
                 event.c = '\b';
-            } else if (event.c == '#') {
+            } else if (!_modeLock && event.c == '#') {
                 // mode select
                 _mode = (_mode + 1)%3;
                 event.type = KM_MODE;
@@ -73,17 +73,20 @@ boolean KeyMatrixPhone::pollEvent() {
     return false;
 }
 
-void KeyMatrixPhone::startTextMode(char *buffer, int length) {
+void KeyMatrixPhone::startTextMode(char *buffer, int length, char mode, bool modeLock) {
     _buff = buffer;
     _len = length;
     _cur = 0;
     _buff[0] = '\0';
+    _mode = mode;
+    _modeLock = modeLock;
 }
 
 void KeyMatrixPhone::stopTextMode() {
     _buff = NULL;
     _len = 0;
     _cur = -1;
+    _mode = KM_MODE_NONE;
 }
 
 int KeyMatrixPhone::cursor() {
